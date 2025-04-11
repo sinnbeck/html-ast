@@ -123,7 +123,7 @@ class Lexer
         $this->skipWhitespace();
         // Consume the tag name.
         $tagName = $this->consumeWhile(function ($ch) {
-            return preg_match('/[A-Za-z0-9:_\-]/', $ch);
+            return preg_match('/[A-Za-z0-9\:_\-]/', $ch);
         });
         // If no valid tag name is found (for example, only newline), skip to closing '>'
         if (trim($tagName) === '') {
@@ -187,6 +187,11 @@ class Lexer
             $rawText = substr($this->input, $this->position, $index - $this->position);
             $this->position = $index;
         }
+        // Remove an initial line break (and any spaces) and a final line break
+        // if these are the only characters on their respective lines.
+        $rawText = preg_replace('/^\s*\n/', '', $rawText);
+        $rawText = preg_replace('/\n\s*$/', '', $rawText);
+
         $this->tokens[] = ['type' => TokenType::RAW, 'value' => $rawText];
         // Consume the closing tag so it is not tokenized.
         if ($this->lookAhead("</" . $tagName)) {
