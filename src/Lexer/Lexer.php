@@ -95,8 +95,7 @@ class Lexer
 
     /**
      * Consume text until a '<' is encountered.
-     * This version checks that there is at least one non-whitespace character;
-     * if not, the text is discarded.
+     * Only produces a token if the text contains at least one non-whitespace character.
      */
     protected function consumeText(): void
     {
@@ -105,7 +104,6 @@ class Lexer
             $this->position++;
         }
         $text = substr($this->input, $start, $this->position - $start);
-        // Only add a text token if there's a non-whitespace character.
         if (preg_match('/\S/', $text)) {
             $this->tokens[] = ['type' => TokenType::TEXT, 'value' => trim($text)];
         }
@@ -125,8 +123,7 @@ class Lexer
         $tagName = $this->consumeWhile(function ($ch) {
             return preg_match('/[A-Za-z0-9\:_\-]/', $ch);
         });
-        // If no valid tag name is found (for example, only newline), skip to closing '>'
-        if (trim($tagName) === '') {
+        if (trim($tagName) === '') { // Skip if tag name is empty (e.g. stray newline)
             while ($this->position < $this->length && $this->peek() !== '>') {
                 $this->consume();
             }
@@ -153,7 +150,6 @@ class Lexer
         // Detect if the tag is a void element.
         $lowerTag = strtolower($tagName);
         if (in_array($lowerTag, $this->voidElements)) {
-            // Even if the source did not use a slash, void elements are self-closing.
             if ($this->lookAhead('/>')) {
                 $this->consume(2);
             } elseif ($this->peek() === '>') {
@@ -161,7 +157,6 @@ class Lexer
             }
             $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE, 'value' => '/>'];
         } else {
-            // For non-void elements.
             if ($this->lookAhead('/>')) {
                 $this->consume(2);
                 $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE, 'value' => '/>'];
@@ -176,6 +171,9 @@ class Lexer
         }
     }
 
+    /**
+     * Capture raw text up to the closing tag, then normalize its indentation.
+     */
     protected function consumeRawTextAndClosingTag(string $tagName): void
     {
         $pattern = "</" . $tagName;
@@ -187,11 +185,8 @@ class Lexer
             $rawText = substr($this->input, $this->position, $index - $this->position);
             $this->position = $index;
         }
-        // Remove an initial line break (and any spaces) and a final line break
-        // if these are the only characters on their respective lines.
-        $rawText = preg_replace('/^\s*\n/', '', $rawText);
-        $rawText = preg_replace('/\n\s*$/', '', $rawText);
-
+        // Normalize raw text indentation.
+        $rawText = $this->normalizeRawIndentation($rawText);
         $this->tokens[] = ['type' => TokenType::RAW, 'value' => $rawText];
         // Consume the closing tag so it is not tokenized.
         if ($this->lookAhead("</" . $tagName)) {
@@ -201,6 +196,45 @@ class Lexer
                 $this->consume();
             }
         }
+    }
+
+    /**
+     * Normalize the indentation of raw content:
+     * - Split the content into lines.
+     * - Remove any leading and trailing blank lines.
+     * - Detect the common indent of the first non-empty line and remove that indent from all lines.
+     */
+    protected function normalizeRawIndentation(string $raw): string
+    {
+        $lines = preg_split('/\R/', $raw);
+
+        // Remove leading empty lines.
+        while (!empty($lines) && trim($lines[0]) === '') {
+            array_shift($lines);
+        }
+        // Remove trailing empty lines.
+        while (!empty($lines) && trim(end($lines)) === '') {
+            array_pop($lines);
+        }
+        if (empty($lines)) {
+            return '';
+        }
+        // Determine common indent from the first line.
+        if (preg_match('/^( *)/', $lines[0], $matches)) {
+            $commonIndent = $matches[1];
+        } else {
+            $commonIndent = '';
+        }
+        $indentLength = strlen($commonIndent);
+        // Remove the common indent from all lines.
+        foreach ($lines as &$line) {
+            if (strlen($line) >= $indentLength && strpos($line, $commonIndent) === 0) {
+                $line = substr($line, $indentLength);
+            }
+        }
+        unset($line);
+        // Rejoin lines with newline.
+        return implode("\n", $lines);
     }
 
     protected function skipWhitespace(): void

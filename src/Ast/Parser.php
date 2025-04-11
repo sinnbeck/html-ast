@@ -50,7 +50,7 @@ class Parser
         }
         if ($token['type'] === TokenType::RAW) {
             $this->advance();
-            return new Node('text', '', [], [], $token['value']);
+            return new Node('raw', '', [], [], $token['value']);
         }
         if ($token['type'] === TokenType::TAG_OPEN) {
             return $this->parseElement();
@@ -81,7 +81,7 @@ class Parser
                 $rawContent = $this->peek()['value'];
                 $this->advance();
                 return new Node('element', $tagName, $attributes, [
-                    new Node('text', '', [], [], $rawContent)
+                    new Node('raw', '', [], [], $rawContent)
                 ]);
             }
             $children = $this->parseChildren($tagName);

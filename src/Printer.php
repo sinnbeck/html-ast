@@ -38,13 +38,24 @@ class Printer
 
     protected function renderNode(Node $node, int $level): string
     {
+        // For doctype nodes, output as-is.
         if ($node->type === 'doctype') {
             return $node->content . $this->newline;
         }
+
         $indent = str_repeat($this->indentStr, $level);
+
+        // For raw nodes, call renderRaw() to reindent them.
+        if ($node->type === 'raw') {
+            return $this->renderRaw($node->content, $level);
+        }
+
+        // For plain text nodes.
         if ($node->type === 'text') {
             return $indent . $node->content . $this->newline;
         }
+
+        // Process element nodes.
         if ($node->type === 'element') {
             $tagLower = strtolower($node->tag);
             $html = $indent . "<" . $node->tag;
@@ -55,16 +66,16 @@ class Printer
                     $html .= " " . $name;
                 }
             }
-            // If the element is a void element, render it in self-closing style.
+            // For void elements, render in self-closing style.
             if (in_array($tagLower, $this->voidElements)) {
                 $html .= " />" . $this->newline;
 
                 return $html;
             }
-            // Otherwise, render children and a closing tag.
+            // Determine whether there are significant children.
             $hasChildren = false;
             foreach ($node->children as $child) {
-                if ($child->type === 'text' && trim($child->content) === '') {
+                if (($child->type === 'text' | $child->type === 'raw') && trim($child->content) === '') {
                     continue;
                 }
                 $hasChildren = true;
@@ -84,5 +95,36 @@ class Printer
         }
 
         return '';
+    }
+
+    /**
+     * Render raw content by reindenting it.
+     * The approach is:
+     * - Split the raw content into lines.
+     * - For the first line, remove any leading whitespace (to avoid double indentation).
+     * - Then prepend the printer's base indent (based on the current level) to every line.
+     *
+     * @param string $raw   The normalized raw content (with no common indent).
+     * @param int    $level The current printer indent level.
+     *
+     * @return string The reindented raw content.
+     */
+    protected function renderRaw(string $raw, int $level): string
+    {
+        $baseIndent = str_repeat($this->indentStr, $level);
+        $lines = preg_split('/\R/', $raw);
+
+        $newLines = [];
+        $first = true;
+        foreach ($lines as $line) {
+            if ($first) {
+                // Remove any leading whitespace from the first line.
+                $line = ltrim($line);
+                $first = false;
+            }
+            $newLines[] = $baseIndent . $line;
+        }
+
+        return implode($this->newline, $newLines) . $this->newline;
     }
 }
