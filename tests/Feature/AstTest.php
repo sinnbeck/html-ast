@@ -13,6 +13,34 @@ it('can parse tokens', function () {
     $nodes = $ast->parse();
     expect($nodes)->toHaveCount(2);
 
-    expect($nodes[0])->toBeInstanceOf(Node::class);
+    expect($nodes[0])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', 'doctype');
+
+    expect($nodes[1])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', 'element')
+        ->toHaveKey('tag', 'html')
+        ->toHaveKey('children');
+
+    expect($nodes[1]->children[0])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', 'element')
+        ->toHaveKey('tag', 'head');
+
+    expect($nodes[1]->children[0]->children[0])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', 'element')
+        ->toHaveKey('tag', 'meta');
+
+    expect($nodes[1]->children[1])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', 'element')
+        ->toHaveKey('tag', 'body');
+
+    expect($nodes[1]->children[1]->children[0])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', 'element')
+        ->toHaveKey('tag', 'div');
 
 });
