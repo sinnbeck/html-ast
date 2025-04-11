@@ -16,6 +16,19 @@ it('can print basic', function () {
     expect($printer->render($nodes))->toEqual($html);
 });
 
+it('can fix basic-scrambled', function () {
+    $htmlScrambled = getFixture('basic-scrambled.html');
+    $lexer = new Lexer($htmlScrambled);
+
+    $ast = new Parser($lexer->lex());
+
+    $nodes = $ast->parse();
+
+    $printer = new Printer();
+    $html = getFixture('basic.html');
+    expect($printer->render($nodes))->toEqual($html);
+});
+
 it('can print complex', function () {
     $html = getFixture('complex.html');
     $lexer = new Lexer($html);
