@@ -1,6 +1,7 @@
 <?php
 
 use Sinnbeck\HtmlAst\Ast\Node;
+use Sinnbeck\HtmlAst\Ast\NodeType;
 use Sinnbeck\HtmlAst\Ast\Parser;
 use Sinnbeck\HtmlAst\Lexer\Lexer;
 
@@ -15,32 +16,46 @@ it('can parse tokens', function () {
 
     expect($nodes[0])
         ->toBeInstanceOf(Node::class)
-        ->toHaveKey('type', 'doctype');
+        ->toHaveKey('type', NodeType::DOCTYPE);
 
     expect($nodes[1])
         ->toBeInstanceOf(Node::class)
-        ->toHaveKey('type', 'element')
+        ->toHaveKey('type', NodeType::ELEMENT)
         ->toHaveKey('tag', 'html')
         ->toHaveKey('children');
 
     expect($nodes[1]->children[0])
         ->toBeInstanceOf(Node::class)
-        ->toHaveKey('type', 'element')
+        ->toHaveKey('type', NodeType::ELEMENT)
         ->toHaveKey('tag', 'head');
 
     expect($nodes[1]->children[0]->children[0])
         ->toBeInstanceOf(Node::class)
-        ->toHaveKey('type', 'element')
+        ->toHaveKey('type', NodeType::ELEMENT)
         ->toHaveKey('tag', 'meta');
 
     expect($nodes[1]->children[1])
         ->toBeInstanceOf(Node::class)
-        ->toHaveKey('type', 'element')
+        ->toHaveKey('type', NodeType::ELEMENT)
         ->toHaveKey('tag', 'body');
 
     expect($nodes[1]->children[1]->children[0])
         ->toBeInstanceOf(Node::class)
-        ->toHaveKey('type', 'element')
+        ->toHaveKey('type', NodeType::ELEMENT)
         ->toHaveKey('tag', 'div');
+
+    expect($nodes[1]->children[1]->children[0]->children[0])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', NodeType::ELEMENT)
+        ->toHaveKey('tag', 'img')
+        ->toHaveKey('attributes', [
+            'src' => '/gfx/logo.png',
+            'alt' => 'logo',
+        ]);
+
+    expect($nodes[1]->children[1]->children[1]->children[0])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', NodeType::TEXT)
+        ->toHaveKey('content', 'Smaller text');
 
 });

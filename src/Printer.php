@@ -3,12 +3,13 @@
 namespace Sinnbeck\HtmlAst;
 
 use Sinnbeck\HtmlAst\Ast\Node;
+use Sinnbeck\HtmlAst\Ast\NodeType;
 
 class Printer
 {
-    protected $indentStr = "    ";
-    protected $newline = "\n";
-    protected $voidElements = [
+    protected string $indentStr = "    ";
+    protected string $newline = "\n";
+    protected array $voidElements = [
         'area',
         'base',
         'br',
@@ -44,24 +45,24 @@ class Printer
     protected function renderNode(Node $node, int $level): string
     {
         // For doctype nodes, output as-is.
-        if ($node->type === 'doctype') {
+        if ($node->type === NodeType::DOCTYPE) {
             return $node->content . $this->newline;
         }
 
         $indent = str_repeat($this->indentStr, $level);
 
         // For raw nodes, call renderRaw() to reindent them.
-        if ($node->type === 'raw') {
+        if ($node->type === NodeType::RAW) {
             return $this->renderRaw($node->content, $level);
         }
 
         // For plain text nodes.
-        if ($node->type === 'text') {
+        if ($node->type === NodeType::TEXT) {
             return $indent . $node->content . $this->newline;
         }
 
         // Process element nodes.
-        if ($node->type === 'element') {
+        if ($node->type === NodeType::ELEMENT) {
             $tagLower = strtolower($node->tag);
             $html = $indent . "<" . $node->tag;
             foreach ($node->attributes as $name => $value) {
@@ -80,7 +81,7 @@ class Printer
             // Determine whether there are significant children.
             $hasChildren = false;
             foreach ($node->children as $child) {
-                if (($child->type === 'text' | $child->type === 'raw') && trim($child->content) === '') {
+                if (($child->type === NodeType::TEXT | $child->type === NodeType::RAW) && trim($child->content) === '') {
                     continue;
                 }
                 $hasChildren = true;

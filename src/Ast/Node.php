@@ -11,7 +11,7 @@ class Node
     public $content;    // For text or doctype nodes.
 
     public function __construct(
-        string $type,
+        NodeType $type,
         string $tag = '',
         array  $attributes = [],
         array  $children = [],

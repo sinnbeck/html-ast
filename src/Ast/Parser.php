@@ -12,9 +12,9 @@ class Parser
 
     public function __construct(array $tokens)
     {
-        $this->tokens   = $tokens;
+        $this->tokens = $tokens;
         $this->position = 0;
-        $this->length   = count($tokens);
+        $this->length = count($tokens);
     }
 
     public static function make(array $tokens): self
@@ -31,35 +31,41 @@ class Parser
                 $nodes[] = $node;
             }
         }
+
         return $nodes;
     }
 
     protected function parseNode(): ?Node
     {
         $token = $this->peek();
-        if (!$token) {
+        if (! $token) {
             return null;
         }
         if ($token['type'] === TokenType::DOCTYPE) {
             $this->advance();
-            return new Node('doctype', '', [], [], $token['value']);
+
+            return new Node(NodeType::DOCTYPE, '', [], [], $token['value']);
         }
         if ($token['type'] === TokenType::TEXT) {
             $this->advance();
-            return new Node('text', '', [], [], $token['value']);
+
+            return new Node(NodeType::TEXT, '', [], [], $token['value']);
         }
         if ($token['type'] === TokenType::RAW) {
             $this->advance();
-            return new Node('raw', '', [], [], $token['value']);
+
+            return new Node(NodeType::RAW, '', [], [], $token['value']);
         }
         if ($token['type'] === TokenType::TAG_OPEN) {
             return $this->parseElement();
         }
         if ($token['type'] === TokenType::TAG_CLOSE) {
             $this->consumeClosingTag();
+
             return null;
         }
         $this->advance();
+
         return null;
     }
 
@@ -72,22 +78,29 @@ class Parser
         $nextToken = $this->peek();
         if ($nextToken && $nextToken['type'] === TokenType::TAG_SELF_CLOSE) {
             $this->advance();
-            return new Node('element', $tagName, $attributes, []);
-        } elseif ($nextToken && $nextToken['type'] === TokenType::TAG_END) {
+
+            return new Node(NodeType::ELEMENT, $tagName, $attributes, []);
+        } else if ($nextToken && $nextToken['type'] === TokenType::TAG_END) {
             $this->advance();
             // For raw tags like script or style, if a T_RAW token is present use it as the sole child.
-            if (in_array(strtolower($tagName), ['script', 'style'])
+            if (in_array(strtolower($tagName), [
+                    'script',
+                    'style',
+                ])
                 && $this->peek() && $this->peek()['type'] === TokenType::RAW) {
                 $rawContent = $this->peek()['value'];
                 $this->advance();
-                return new Node('element', $tagName, $attributes, [
-                    new Node('raw', '', [], [], $rawContent)
+
+                return new Node(NodeType::ELEMENT, $tagName, $attributes, [
+                    new Node(NodeType::RAW, '', [], [], $rawContent),
                 ]);
             }
-            $children = $this->parseChildren($tagName);
-            return new Node('element', $tagName, $attributes, $children);
+            $children = $this->parseChildren();
+
+            return new Node(NodeType::ELEMENT, $tagName, $attributes, $children);
         }
-        return new Node('element', $tagName, $attributes, []);
+
+        return new Node(NodeType::ELEMENT, $tagName, $attributes, []);
     }
 
     protected function parseAttributes(): array
@@ -95,8 +108,15 @@ class Parser
         $attributes = [];
         while ($this->position < $this->length) {
             $token = $this->peek();
-            if (!$token) break;
-            if (in_array($token['type'], [TokenType::TAG_END, TokenType::TAG_SELF_CLOSE])) break;
+            if (! $token) {
+                break;
+            }
+            if (in_array($token['type'], [
+                TokenType::TAG_END,
+                TokenType::TAG_SELF_CLOSE,
+            ])) {
+                break;
+            }
             if ($token['type'] === TokenType::ATTR_NAME) {
                 $attrName = $token['value'];
                 $this->advance();
@@ -110,15 +130,18 @@ class Parser
                 $this->advance();
             }
         }
+
         return $attributes;
     }
 
-    protected function parseChildren(string $parentTag): array
+    protected function parseChildren(): array
     {
         $children = [];
         while ($this->position < $this->length) {
             $token = $this->peek();
-            if (!$token) break;
+            if (! $token) {
+                break;
+            }
             if ($token['type'] === TokenType::TAG_CLOSE) {
                 $this->consumeClosingTag();
                 break;
@@ -128,12 +151,13 @@ class Parser
                 $children[] = $child;
             }
         }
+
         return $children;
     }
 
     protected function consumeClosingTag(): void
     {
-        $this->advance(); // Consume T_TAG_CLOSE.
+        $this->advance(); // Consume TAG_CLOSE.
         if ($this->peek() && $this->peek()['type'] === TokenType::TAG_END) {
             $this->advance();
         }
