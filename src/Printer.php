@@ -26,6 +26,11 @@ class Printer
         'wbr',
     ];
 
+    public static function make(): self
+    {
+        return new self();
+    }
+
     public function render(array $nodes, int $level = 0): string
     {
         $html = '';

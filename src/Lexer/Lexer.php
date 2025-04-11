@@ -21,7 +21,7 @@ class Lexer
         $this->position = 0;
     }
 
-    public static function make(string $input): self
+    public static function fromString(string $input): self
     {
         return new self($input);
     }

@@ -10,11 +10,11 @@ it('can read an html file and output a tokens array', function () {
 
 it('has the same output no matter format of the input', function () {
     $html = getFixture('basic.html');
-    $lexer  = Lexer::make($html);
+    $lexer  = Lexer::fromString($html);
     $tokens1 = $lexer->lex();
 
     $html = getFixture('basic-scrambled.html');
-    $lexer  = Lexer::make($html);
+    $lexer  = Lexer::fromString($html);
     $tokens2 = $lexer->lex();
     expect($tokens1)->toEqual($tokens2);
 });
