@@ -134,7 +134,16 @@ class Lexer
         }
         $this->tokens[] = ['type' => $tagType, 'value' => $tagName];
         $this->skipWhitespace();
-        // Process attributes.
+
+        // For closing tags, simply consume the '>' without tokenizing it.
+        if ($tagType === TokenType::TAG_CLOSE) {
+            if ($this->peek() === '>') {
+                $this->consume();
+            }
+            return;
+        }
+
+        // Process attributes for opening tags.
         while (
             $this->position < $this->length &&
             $this->peek() !== '>' &&
@@ -155,18 +164,18 @@ class Lexer
             } elseif ($this->peek() === '>') {
                 $this->consume();
             }
-            $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE, 'value' => '/>'];
+            $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE];
         } else {
             if ($this->lookAhead('/>')) {
                 $this->consume(2);
-                $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE, 'value' => '/>'];
+                $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE];
             } elseif ($this->peek() === '>') {
                 $this->consume();
-                $this->tokens[] = ['type' => TokenType::TAG_END, 'value' => '>'];
+                $this->tokens[] = ['type' => TokenType::TAG_END];
             }
         }
-        // For raw tags (script, style), capture inner content and consume the closing tag.
-        if ($tagType === TokenType::TAG_OPEN && in_array($lowerTag, ['script', 'style'])) {
+        // For raw tags (script, style), capture inner content and leave the pointer at the closing tag.
+        if (in_array($lowerTag, ['script', 'style'])) {
             $this->consumeRawTextAndClosingTag($lowerTag);
         }
     }
@@ -176,7 +185,7 @@ class Lexer
      */
     protected function consumeRawTextAndClosingTag(string $tagName): void
     {
-        $pattern = "</" . $tagName;
+        $pattern = '</' . $tagName; // We don't search for > as there could be a space between the tag and > by mistake
         $index = stripos($this->input, $pattern, $this->position);
         if ($index === false) {
             $rawText = substr($this->input, $this->position);
@@ -186,7 +195,7 @@ class Lexer
             // Leave the pointer at the beginning of the closing tag.
             $this->position = $index;
         }
-        // Normalize raw text indentation.
+
         $rawText = $this->normalizeRawIndentation($rawText);
         $this->tokens[] = ['type' => TokenType::RAW, 'value' => $rawText];
     }

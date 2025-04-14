@@ -6,7 +6,7 @@ use Sinnbeck\HtmlAst\Lexer\TokenType;
 it('can read an html file and output a tokens array', function () {
     $html = getFixture('basic.html');
     $lexer  = new Lexer($html);
-    expect($lexer->lex())->toHaveCount(77);
+    expect($lexer->lex())->toHaveCount(69);
 });
 
 it('has the same output no matter format of the input', function () {
@@ -26,16 +26,16 @@ it('can read get open and closing div tags', function () {
     $tokens = $lexer->lex();
 
     //Opening div tag
-    expect($tokens[55])
+    expect($tokens[52])
         ->toHaveKey('value', 'div')
         ->toHaveKey('type', TokenType::TAG_OPEN);
 
     //end opening div tag
-    expect($tokens[58])
+    expect($tokens[55])
         ->toHaveKey('type', TokenType::TAG_END);
 
     //close div tag
-    expect($tokens[60])
+    expect($tokens[58])
         ->toHaveKey('value', 'div')
         ->toHaveKey('type', TokenType::TAG_CLOSE);
 });
@@ -45,19 +45,17 @@ it('can read get open and closing script tags', function () {
     $lexer  = new Lexer($html);
     $tokens = $lexer->lex();
 
-//    dd($tokens[65]);
-
     //Opening script tag
-    expect($tokens[60])
+    expect($tokens[55])
         ->toHaveKey('value', 'script')
         ->toHaveKey('type', TokenType::TAG_OPEN);
 
     //end opening script tag
-    expect($tokens[65])
+    expect($tokens[60])
         ->toHaveKey('type', TokenType::TAG_END);
 
     //close div tag
-    expect($tokens[67])
+    expect($tokens[62])
         ->toHaveKey('value', 'script')
         ->toHaveKey('type', TokenType::TAG_CLOSE);
 });

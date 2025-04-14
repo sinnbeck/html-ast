@@ -170,9 +170,6 @@ class Parser
     protected function consumeClosingTag(): void
     {
         $this->advance(); // Consume TAG_CLOSE.
-        if ($this->peek() && $this->peek()['type'] === TokenType::TAG_END) {
-            $this->advance();
-        }
     }
 
     protected function peek(): ?array
