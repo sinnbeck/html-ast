@@ -81,10 +81,10 @@ use Sinnbeck\HtmlAst\Ast\Parser;
 $ast = Parser::make($tokens);
 
 // Parse tokens into an AST (node tree)
-$nodeTree = $ast->parse();
+$nodes = $ast->parse();
 
 // Optionally, inspect the node tree:
-print_r($nodeTree);
+print_r($nodes);
 ```
 
 ### Printing
@@ -95,7 +95,7 @@ The printer takes an HTML input or the resulting AST and renders it as neatly fo
 use Sinnbeck\HtmlAst\Printer;
 
 // Create a Printer instance and render the HTML string
-echo Printer::make($nodeTree)->render();
+echo Printer::make($nodes)->render();
 ```
 
 If you need to indent all lines by a certain level, you can easily do so.
@@ -103,7 +103,7 @@ If you need to indent all lines by a certain level, you can easily do so.
 use Sinnbeck\HtmlAst\Printer;
 
 // Indents everything by 1 extra indentation level
-echo Printer::make($nodeTree)->render(1);
+echo Printer::make($nodes)->render(1);
 ```
 
 By default the output is indented with 4 spaces.
@@ -112,7 +112,7 @@ This can be easily changed by calling `->withIndent()`
 use Sinnbeck\HtmlAst\Printer;
 
 // Indents with tab instead of 4 spaces
-echo Printer::make($nodeTree)->indentWith("\t")->render();
+echo Printer::make($nodes)->indentWith("\t")->render();
 ```
 
 ## Testing
