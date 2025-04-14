@@ -95,7 +95,7 @@ The printer takes an HTML input or the resulting AST and renders it as neatly fo
 use Sinnbeck\HtmlAst\Printer;
 
 // Create a Printer instance and render the HTML string
-echo Printer::make()->render($html);
+echo Printer::make()->render($nodeTree);
 ```
 
 ## Testing
