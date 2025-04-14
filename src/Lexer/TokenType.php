@@ -13,4 +13,5 @@ enum TokenType
     case RAW;
     case ATTR_NAME;
     case ATTR_VALUE;
+    case COMMENT;
 }

@@ -102,13 +102,21 @@ class Lexer
     protected function consumeComment(): void
     {
         $this->consume(4); // consumes '<!--'
+        $start = $this->position;
         $end = strpos($this->input, '-->', $this->position);
         if ($end === false) {
+            // If there is no closing tag, capture the rest of the input as the comment.
+            $commentText = substr($this->input, $start);
             $this->position = $this->length;
         } else {
-            $this->position = $end + 3;
+            // Extract the comment text (everything up to but not including '-->')
+            $commentText = substr($this->input, $start, $end - $start);
+            $this->position = $end + 3; // consume the closing '-->'
         }
+        // Add a token for the comment.
+        $this->addToken(TokenType::COMMENT, $commentText);
     }
+
 
     /**
      * Consume text until a '<' is encountered.

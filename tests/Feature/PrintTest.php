@@ -40,3 +40,27 @@ it('can print complex', function () {
     $printer = new Printer();
     expect($printer->render($nodes))->toEqual($html);
 });
+
+it('can print fragments', function () {
+    $html = getFixture('fragment.html');
+    $lexer = new Lexer($html);
+
+    $ast = new Parser($lexer->lex());
+
+    $nodes = $ast->parse();
+
+    $printer = new Printer();
+    expect($printer->render($nodes))->toEqual($html);
+});
+
+it('can print comments', function () {
+    $html = getFixture('comments.html');
+    $lexer = new Lexer($html);
+
+    $ast = new Parser($lexer->lex());
+
+    $nodes = $ast->parse();
+
+    $printer = new Printer();
+    expect($printer->render($nodes))->toEqual($html);
+});

@@ -44,17 +44,19 @@ class Parser
         }
         if ($token->type === TokenType::DOCTYPE) {
             $this->advance();
-
             return new Node(NodeType::DOCTYPE, '', [], [], $token->value);
         }
         if ($token->type === TokenType::TEXT) {
             $this->advance();
-
             return new Node(NodeType::TEXT, '', [], [], $token->value);
+        }
+        // NEW: Parse a comment token and create a COMMENT node.
+        if ($token->type === TokenType::COMMENT) {
+            $this->advance();
+            return new Node(NodeType::COMMENT, '', [], [], $token->value);
         }
         if ($token->type === TokenType::RAW) {
             $this->advance();
-
             return new Node(NodeType::RAW, '', [], [], $token->value);
         }
         if ($token->type === TokenType::TAG_OPEN) {
@@ -62,13 +64,13 @@ class Parser
         }
         if ($token->type === TokenType::TAG_CLOSE) {
             $this->consumeClosingTag();
-
             return null;
         }
         $this->advance();
 
         return null;
     }
+
 
     protected function parseElement(): Node
     {

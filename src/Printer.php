@@ -39,7 +39,7 @@ class Printer
             $html .= $this->renderNode($node, $level);
         }
 
-        return $html;
+        return rtrim($html); //ensure there is no linebreak on last element
     }
 
     protected function renderNode(Node $node, int $level): string
@@ -54,6 +54,10 @@ class Printer
         // For raw nodes, call renderRaw() to reindent them.
         if ($node->type === NodeType::RAW) {
             return $this->renderRaw($node->content, $level);
+        }
+
+        if ($node->type === NodeType::COMMENT) {
+            return $this->renderComment($node->content, $indent);
         }
 
         // For plain text nodes.
@@ -132,5 +136,10 @@ class Printer
         }
 
         return implode($this->newline, $newLines) . $this->newline;
+    }
+
+    private function renderComment(string $content, string $indent)
+    {
+        return $indent . '<!--' . $content . '-->' . $this->newline;
     }
 }

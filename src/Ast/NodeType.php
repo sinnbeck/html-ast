@@ -8,4 +8,5 @@ enum NodeType
     case ELEMENT;
     case TEXT;
     case RAW;
+    case COMMENT;
 }
