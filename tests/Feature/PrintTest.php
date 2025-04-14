@@ -64,3 +64,20 @@ it('can print comments', function () {
     $printer = new Printer();
     expect($printer->render($nodes))->toEqual($html);
 });
+
+it('can handle all inline tags', function () {
+    $html = getFixture('inline-tags.html');
+    $lexer = new Lexer($html);
+    $nodes = Parser::make($lexer->lex())->parse();
+    expect(Printer::make()->render($nodes))->toEqual(
+<<<HTML
+<img src="logo.png" alt="logo" />
+<img src="logo.png" alt="logo" />
+<img src="logo.png" alt="logo" />
+<br />
+<br />
+<br />
+HTML
+
+    );
+});
