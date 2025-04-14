@@ -70,7 +70,7 @@ it('can handle all inline tags', function () {
     $lexer = new Lexer($html);
     $nodes = Parser::make($lexer->lex())->parse();
     expect(Printer::make()->render($nodes))->toEqual(
-<<<HTML
+        <<<HTML
 <img src="logo.png" alt="logo" />
 <img src="logo.png" alt="logo" />
 <img src="logo.png" alt="logo" />
@@ -78,6 +78,5 @@ it('can handle all inline tags', function () {
 <br />
 <br />
 HTML
-
     );
 });

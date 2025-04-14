@@ -188,7 +188,7 @@ class Lexer
         if (in_array($lowerTag, $this->voidElements)) {
             if ($this->lookAhead('/>')) {
                 $this->consume(2);
-            } else if ($this->peek() === '>') {
+            } elseif ($this->peek() === '>') {
                 $this->consume();
             }
             $this->addToken(TokenType::TAG_SELF_CLOSE);
@@ -196,7 +196,7 @@ class Lexer
             if ($this->lookAhead('/>')) {
                 $this->consume(2);
                 $this->addToken(TokenType::TAG_SELF_CLOSE);
-            } else if ($this->peek() === '>') {
+            } elseif ($this->peek() === '>') {
                 $this->consume();
                 $this->addToken(TokenType::TAG_END);
             }

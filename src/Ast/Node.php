@@ -10,7 +10,6 @@ readonly class Node
         public array    $attributes = [],
         public array    $children = [],
         public string   $content = ''
-    )
-    {
+    ) {
     }
 }

@@ -90,7 +90,7 @@ class Parser
             return new Node(NodeType::ELEMENT, $tagName, $attributes, []);
         }
         // Otherwise, expect a TAG_END for the opening tag.
-        else if ($nextToken && $nextToken->type === TokenType::TAG_END) {
+        elseif ($nextToken && $nextToken->type === TokenType::TAG_END) {
             $this->advance(); // Consume the TAG_END for the opening tag.
 
             // Check if this is a raw element (like script or style).
