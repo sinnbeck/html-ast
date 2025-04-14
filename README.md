@@ -106,7 +106,7 @@ use Sinnbeck\HtmlAst\Printer;
 echo Printer::make($nodes)->render(1);
 ```
 
-By default the output is indented with 4 spaces.
+By default, the output is indented with 4 spaces.
 This can be easily changed by calling `->withIndent()`
 ```php
 use Sinnbeck\HtmlAst\Printer;

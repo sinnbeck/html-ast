@@ -145,7 +145,8 @@ class Printer
                 $line = ltrim($line);
                 $first = false;
             }
-            $newLines[] = $baseIndent . $line;
+            $indent = $line ? $baseIndent : '';
+            $newLines[] = $indent . $line;
         }
 
         return implode($this->newline, $newLines) . $this->newline;
