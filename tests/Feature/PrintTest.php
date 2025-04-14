@@ -109,3 +109,11 @@ it('can handle all inline tags', function () {
 HTML
     );
 });
+
+it('can handle html inside of attributes', function () {
+    $html = getFixture('html-in-attributes.html');
+
+    $tokens = Lexer::fromString($html)->lex();
+    $nodes = Parser::make($tokens)->parse();
+    expect(Printer::make($nodes)->render())->toEqual($html);
+});

@@ -81,17 +81,17 @@ class Printer
         // Process element nodes.
         if ($node->type === NodeType::ELEMENT) {
             $tagLower = strtolower($node->tag);
-            $html = $indent . "<" . $node->tag;
+            $html = $indent . '<' . $node->tag;
             foreach ($node->attributes as $name => $value) {
                 if ($value !== null) {
-                    $html .= " " . $name . '="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false) . '"';
+                    $html .= ' ' . $name . '="' . $value . '"';
                 } else {
-                    $html .= " " . $name;
+                    $html .= ' ' . $name;
                 }
             }
             // For void elements, render in self-closing style.
             if (in_array($tagLower, $this->voidElements)) {
-                $html .= " />" . $this->newline;
+                $html .= ' />' . $this->newline;
 
                 return $html;
             }
