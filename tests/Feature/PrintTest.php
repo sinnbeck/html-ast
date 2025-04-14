@@ -29,6 +29,19 @@ it('can fix basic-scrambled', function () {
     expect($printer->render())->toEqual($html);
 });
 
+it('can indent with tabs', function () {
+    $html = getFixture('basic.html');
+    $lexer = new Lexer($html);
+
+    $ast = new Parser($lexer->lex());
+
+    $nodes = $ast->parse();
+
+    $printer = new Printer($nodes);
+    $html = str_replace('    ', "\t", $printer->render());
+    expect($printer->indentWith("\t")->render())->toEqual($html);
+});
+
 it('can print complex', function () {
     $html = getFixture('complex.html');
     $lexer = new Lexer($html);

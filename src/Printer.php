@@ -38,6 +38,13 @@ class Printer
         return new self($nodes);
     }
 
+    public function indentWith(string $indentStr): self
+    {
+        $this->indentStr = $indentStr;
+
+        return $this;
+    }
+
     public function render(int $level = 0): string
     {
         $html = '';

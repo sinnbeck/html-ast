@@ -106,6 +106,15 @@ use Sinnbeck\HtmlAst\Printer;
 echo Printer::make($nodeTree)->render(1);
 ```
 
+By default the output is indented with 4 spaces.
+This can be easily changed by calling `->withIndent()`
+```php
+use Sinnbeck\HtmlAst\Printer;
+
+// Indents with tab instead of 4 spaces
+echo Printer::make($nodeTree)->indentWith("\t")->render();
+```
+
 ## Testing
 
 The repository includes tests under the `tests` directory, using [Pest PHP](https://pestphp.com/) as the testing framework and Symfony's VarDumper for debugging. To run tests, execute:
