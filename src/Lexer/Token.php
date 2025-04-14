@@ -2,11 +2,11 @@
 
 namespace Sinnbeck\HtmlAst\Lexer;
 
-class Token
+readonly class Token
 {
     public function __construct(
-        public readonly TokenType $type,
-        public readonly string $value,
+        public TokenType $type,
+        public string    $value,
     )
     {}
 }
