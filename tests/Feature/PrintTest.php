@@ -12,8 +12,8 @@ it('can print basic', function () {
 
     $nodes = $ast->parse();
 
-    $printer = new Printer();
-    expect($printer->render($nodes))->toEqual($html);
+    $printer = new Printer($nodes);
+    expect($printer->render())->toEqual($html);
 });
 
 it('can fix basic-scrambled', function () {
@@ -24,9 +24,9 @@ it('can fix basic-scrambled', function () {
 
     $nodes = $ast->parse();
 
-    $printer = new Printer();
+    $printer = new Printer($nodes);
     $html = getFixture('basic.html');
-    expect($printer->render($nodes))->toEqual($html);
+    expect($printer->render())->toEqual($html);
 });
 
 it('can print complex', function () {
@@ -37,8 +37,8 @@ it('can print complex', function () {
 
     $nodes = $ast->parse();
 
-    $printer = new Printer();
-    expect($printer->render($nodes))->toEqual($html);
+    $printer = new Printer($nodes);
+    expect($printer->render())->toEqual($html);
 });
 
 it('can print fragments', function () {
@@ -49,8 +49,8 @@ it('can print fragments', function () {
 
     $nodes = $ast->parse();
 
-    $printer = new Printer();
-    expect($printer->render($nodes))->toEqual($html);
+    $printer = new Printer($nodes);
+    expect($printer->render())->toEqual($html);
 });
 
 it('can print comments', function () {
@@ -61,15 +61,15 @@ it('can print comments', function () {
 
     $nodes = $ast->parse();
 
-    $printer = new Printer();
-    expect($printer->render($nodes))->toEqual($html);
+    $printer = new Printer($nodes);
+    expect($printer->render())->toEqual($html);
 });
 
 it('can handle all inline tags', function () {
     $html = getFixture('inline-tags.html');
     $lexer = new Lexer($html);
     $nodes = Parser::make($lexer->lex())->parse();
-    expect(Printer::make()->render($nodes))->toEqual(
+    expect(Printer::make($nodes)->render())->toEqual(
         <<<HTML
 <img src="logo.png" alt="logo" />
 <img src="logo.png" alt="logo" />

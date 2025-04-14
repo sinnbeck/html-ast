@@ -7,6 +7,7 @@ use Sinnbeck\HtmlAst\Ast\NodeType;
 
 class Printer
 {
+    protected array $nodes;
     protected string $indentStr = "    ";
     protected string $newline = "\n";
     protected array $voidElements = [
@@ -27,15 +28,20 @@ class Printer
         'wbr',
     ];
 
-    public static function make(): self
+    public function __construct(array $nodes)
     {
-        return new self();
+        $this->nodes = $nodes;
     }
 
-    public function render(array $nodes, int $level = 0): string
+    public static function make(array $nodes): self
+    {
+        return new self($nodes);
+    }
+
+    public function render(int $level = 0): string
     {
         $html = '';
-        foreach ($nodes as $node) {
+        foreach ($this->nodes as $node) {
             $html .= $this->renderNode($node, $level);
         }
 
