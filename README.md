@@ -98,6 +98,14 @@ use Sinnbeck\HtmlAst\Printer;
 echo Printer::make($nodeTree)->render();
 ```
 
+If you need to indent all lines by a certain level, you can easily do so.
+```php
+use Sinnbeck\HtmlAst\Printer;
+
+// Indents everything by 1 extra indentation level
+echo Printer::make($nodeTree)->render(1);
+```
+
 ## Testing
 
 The repository includes tests under the `tests` directory, using [Pest PHP](https://pestphp.com/) as the testing framework and Symfony's VarDumper for debugging. To run tests, execute:

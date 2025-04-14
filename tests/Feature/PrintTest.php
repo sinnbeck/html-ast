@@ -53,6 +53,22 @@ it('can print fragments', function () {
     expect($printer->render())->toEqual($html);
 });
 
+it('can indent everything', function () {
+    $html = getFixture('fragment.html');
+    $lexer = new Lexer($html);
+
+    $ast = new Parser($lexer->lex());
+
+    $nodes = $ast->parse();
+
+    $printer = new Printer($nodes);
+    $indented = '';
+    foreach (explode(PHP_EOL, $html) as $line) {
+        $indented .= '    '. $line . PHP_EOL;
+    }
+    expect($printer->render(1))->toEqual(rtrim($indented));
+});
+
 it('can print comments', function () {
     $html = getFixture('comments.html');
     $lexer = new Lexer($html);
