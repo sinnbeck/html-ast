@@ -71,37 +71,49 @@ class Parser
 
     protected function parseElement(): Node
     {
+        // Consume the open tag token (e.g. from '<script').
         $openToken = $this->peek();
         $tagName = $openToken['value'];
-        $this->advance(); // Consume T_TAG_OPEN.
+        $this->advance(); // Consumes TAG_OPEN.
+
+        // Parse any attributes.
         $attributes = $this->parseAttributes();
+
         $nextToken = $this->peek();
+
+        // Handle self-closing tags.
         if ($nextToken && $nextToken['type'] === TokenType::TAG_SELF_CLOSE) {
             $this->advance();
-
             return new Node(NodeType::ELEMENT, $tagName, $attributes, []);
-        } else if ($nextToken && $nextToken['type'] === TokenType::TAG_END) {
-            $this->advance();
-            // For raw tags like script or style, if a T_RAW token is present use it as the sole child.
-            if (in_array(strtolower($tagName), [
-                    'script',
-                    'style',
-                ])
-                && $this->peek() && $this->peek()['type'] === TokenType::RAW) {
-                $rawContent = $this->peek()['value'];
-                $this->advance();
+        }
+        // Otherwise, expect a TAG_END for the opening tag.
+        else if ($nextToken && $nextToken['type'] === TokenType::TAG_END) {
+            $this->advance(); // Consume the TAG_END for the opening tag.
 
-                return new Node(NodeType::ELEMENT, $tagName, $attributes, [
-                    new Node(NodeType::RAW, '', [], [], $rawContent),
-                ]);
+            // Check if this is a raw element (like script or style).
+            if (in_array(strtolower($tagName), ['script', 'style'])) {
+                $children = [];
+                // If a RAW token is present immediately, use it as the element’s content.
+                if ($this->peek() && $this->peek()['type'] === TokenType::RAW) {
+                    $rawToken = $this->peek();
+                    $this->advance();
+                    $children[] = new Node(NodeType::RAW, '', [], [], $rawToken['value']);
+                }
+                // Consume the closing tag tokens (TAG_CLOSE and TAG_END).
+                if ($this->peek() && $this->peek()['type'] === TokenType::TAG_CLOSE) {
+                    $this->consumeClosingTag();
+                }
+                return new Node(NodeType::ELEMENT, $tagName, $attributes, $children);
             }
+            // For all other elements, parse their children normally.
             $children = $this->parseChildren();
-
             return new Node(NodeType::ELEMENT, $tagName, $attributes, $children);
         }
 
+        // Fallback: return an empty element node.
         return new Node(NodeType::ELEMENT, $tagName, $attributes, []);
     }
+
 
     protected function parseAttributes(): array
     {

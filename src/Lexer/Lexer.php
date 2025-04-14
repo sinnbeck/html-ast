@@ -121,7 +121,7 @@ class Lexer
         $this->skipWhitespace();
         // Consume the tag name.
         $tagName = $this->consumeWhile(function ($ch) {
-            return preg_match('/[A-Za-z0-9\:_\-]/', $ch);
+            return preg_match('/[A-Za-z0-9:_\-]/', $ch);
         });
         if (trim($tagName) === '') { // Skip if tag name is empty (e.g. stray newline)
             while ($this->position < $this->length && $this->peek() !== '>') {
@@ -183,19 +183,12 @@ class Lexer
             $this->position = $this->length;
         } else {
             $rawText = substr($this->input, $this->position, $index - $this->position);
+            // Leave the pointer at the beginning of the closing tag.
             $this->position = $index;
         }
         // Normalize raw text indentation.
         $rawText = $this->normalizeRawIndentation($rawText);
         $this->tokens[] = ['type' => TokenType::RAW, 'value' => $rawText];
-        // Consume the closing tag so it is not tokenized.
-        if ($this->lookAhead("</" . $tagName)) {
-            $this->consume(strlen("</" . $tagName));
-            $this->skipWhitespace();
-            if ($this->peek() === '>') {
-                $this->consume();
-            }
-        }
     }
 
     /**

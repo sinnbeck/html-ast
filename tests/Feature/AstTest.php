@@ -12,7 +12,8 @@ it('can parse tokens', function () {
     $ast = new Parser($lexer->lex());
 
     $nodes = $ast->parse();
-    expect($nodes)->toHaveCount(2);
+    expect($nodes)
+        ->toHaveCount(2);
 
     expect($nodes[0])
         ->toBeInstanceOf(Node::class)
@@ -57,5 +58,25 @@ it('can parse tokens', function () {
         ->toBeInstanceOf(Node::class)
         ->toHaveKey('type', NodeType::TEXT)
         ->toHaveKey('content', 'Smaller text');
+
+});
+
+it('can parse script tag', function () {
+    $html = getFixture('complex.html');
+    $lexer = new Lexer($html);
+
+    $ast = new Parser($lexer->lex());
+
+    $nodes = $ast->parse();
+    expect($nodes)->toHaveCount(2);
+
+    expect($nodes[1]->children[1]->children[1])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', NodeType::ELEMENT)
+        ->toHaveKey('tag', 'script');
+
+    expect($nodes[1]->children[1]->children[1]->children[0])
+        ->toBeInstanceOf(Node::class)
+        ->toHaveKey('type', NodeType::RAW);
 
 });
