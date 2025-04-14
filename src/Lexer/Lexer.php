@@ -1,4 +1,5 @@
 <?php
+
 namespace Sinnbeck\HtmlAst\Lexer;
 
 class Lexer
@@ -10,14 +11,27 @@ class Lexer
 
     // List of void (self-closing) elements.
     protected $voidElements = [
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-        'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+        'area',
+        'base',
+        'br',
+        'col',
+        'embed',
+        'hr',
+        'img',
+        'input',
+        'keygen',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
     ];
 
     public function __construct(string $input)
     {
-        $this->input    = $input;
-        $this->length   = strlen($input);
+        $this->input = $input;
+        $this->length = strlen($input);
         $this->position = 0;
     }
 
@@ -46,6 +60,7 @@ class Lexer
                 $this->consumeText();
             }
         }
+
         return $this->tokens;
     }
 
@@ -54,6 +69,7 @@ class Lexer
         if ($this->position + $offset < $this->length) {
             return $this->input[$this->position + $offset];
         }
+
         return null;
     }
 
@@ -66,6 +82,7 @@ class Lexer
     {
         $result = substr($this->input, $this->position, $length);
         $this->position += $length;
+
         return $result;
     }
 
@@ -79,7 +96,7 @@ class Lexer
             $this->consume();
         }
         $value = substr($this->input, $start, $this->position - $start);
-        $this->tokens[] = ['type' => TokenType::DOCTYPE, 'value' => $value];
+        $this->addToken(TokenType::DOCTYPE, $value);
     }
 
     protected function consumeComment(): void
@@ -105,7 +122,7 @@ class Lexer
         }
         $text = substr($this->input, $start, $this->position - $start);
         if (preg_match('/\S/', $text)) {
-            $this->tokens[] = ['type' => TokenType::TEXT, 'value' => trim($text)];
+            $this->addToken(TokenType::TEXT, trim($text));
         }
     }
 
@@ -130,9 +147,10 @@ class Lexer
             if ($this->peek() === '>') {
                 $this->consume();
             }
+
             return;
         }
-        $this->tokens[] = ['type' => $tagType, 'value' => $tagName];
+        $this->addToken($tagType, $tagName);
         $this->skipWhitespace();
 
         // For closing tags, simply consume the '>' without tokenizing it.
@@ -140,6 +158,7 @@ class Lexer
             if ($this->peek() === '>') {
                 $this->consume();
             }
+
             return;
         }
 
@@ -147,7 +166,7 @@ class Lexer
         while (
             $this->position < $this->length &&
             $this->peek() !== '>' &&
-            !$this->lookAhead('/>')
+            ! $this->lookAhead('/>')
         ) {
             $startPos = $this->position;
             $this->consumeAttribute();
@@ -161,21 +180,24 @@ class Lexer
         if (in_array($lowerTag, $this->voidElements)) {
             if ($this->lookAhead('/>')) {
                 $this->consume(2);
-            } elseif ($this->peek() === '>') {
+            } else if ($this->peek() === '>') {
                 $this->consume();
             }
-            $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE];
+            $this->addToken(TokenType::TAG_SELF_CLOSE);
         } else {
             if ($this->lookAhead('/>')) {
                 $this->consume(2);
-                $this->tokens[] = ['type' => TokenType::TAG_SELF_CLOSE];
-            } elseif ($this->peek() === '>') {
+                $this->addToken(TokenType::TAG_SELF_CLOSE);
+            } else if ($this->peek() === '>') {
                 $this->consume();
-                $this->tokens[] = ['type' => TokenType::TAG_END];
+                $this->addToken(TokenType::TAG_END);
             }
         }
         // For raw tags (script, style), capture inner content and leave the pointer at the closing tag.
-        if (in_array($lowerTag, ['script', 'style'])) {
+        if (in_array($lowerTag, [
+            'script',
+            'style',
+        ])) {
             $this->consumeRawTextAndClosingTag($lowerTag);
         }
     }
@@ -197,7 +219,7 @@ class Lexer
         }
 
         $rawText = $this->normalizeRawIndentation($rawText);
-        $this->tokens[] = ['type' => TokenType::RAW, 'value' => $rawText];
+        $this->addToken(TokenType::RAW, $rawText);
     }
 
     /**
@@ -211,11 +233,11 @@ class Lexer
         $lines = preg_split('/\R/', $raw);
 
         // Remove leading empty lines.
-        while (!empty($lines) && trim($lines[0]) === '') {
+        while (! empty($lines) && trim($lines[0]) === '') {
             array_shift($lines);
         }
         // Remove trailing empty lines.
-        while (!empty($lines) && trim(end($lines)) === '') {
+        while (! empty($lines) && trim(end($lines)) === '') {
             array_pop($lines);
         }
         if (empty($lines)) {
@@ -235,6 +257,7 @@ class Lexer
             }
         }
         unset($line);
+
         // Rejoin lines with newline.
         return implode("\n", $lines);
     }
@@ -252,6 +275,7 @@ class Lexer
         while ($this->position < $this->length && $condition($this->peek())) {
             $result .= $this->consume();
         }
+
         return $result;
     }
 
@@ -262,14 +286,14 @@ class Lexer
             return preg_match('/[A-Za-z0-9\-_]/', $ch);
         });
         if ($attrName !== '') {
-            $this->tokens[] = ['type' => TokenType::ATTR_NAME, 'value' => $attrName];
+            $this->addToken(TokenType::ATTR_NAME, $attrName);
         }
         $this->skipWhitespace();
         if ($this->peek() === '=') {
             $this->consume(); // consume '='
             $this->skipWhitespace();
             $attrValue = $this->consumeAttributeValue();
-            $this->tokens[] = ['type' => TokenType::ATTR_VALUE, 'value' => $attrValue];
+            $this->addToken(TokenType::ATTR_VALUE, $attrValue);
         }
     }
 
@@ -283,10 +307,17 @@ class Lexer
                 $value .= $this->consume();
             }
             $this->consume(); // consume closing quote
+
             return $value;
         }
+
         return $this->consumeWhile(function ($ch) {
-            return !ctype_space($ch) && $ch !== '>' && $ch !== '/';
+            return ! ctype_space($ch) && $ch !== '>' && $ch !== '/';
         });
+    }
+
+    private function addToken(TokenType $tagType, string $value = ''): void
+    {
+        $this->tokens[] = new Token($tagType, $value);
     }
 }

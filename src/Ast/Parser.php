@@ -2,6 +2,7 @@
 
 namespace Sinnbeck\HtmlAst\Ast;
 
+use Sinnbeck\HtmlAst\Lexer\Token;
 use Sinnbeck\HtmlAst\Lexer\TokenType;
 
 class Parser
@@ -41,25 +42,25 @@ class Parser
         if (! $token) {
             return null;
         }
-        if ($token['type'] === TokenType::DOCTYPE) {
+        if ($token->type === TokenType::DOCTYPE) {
             $this->advance();
 
-            return new Node(NodeType::DOCTYPE, '', [], [], $token['value']);
+            return new Node(NodeType::DOCTYPE, '', [], [], $token->value);
         }
-        if ($token['type'] === TokenType::TEXT) {
+        if ($token->type === TokenType::TEXT) {
             $this->advance();
 
-            return new Node(NodeType::TEXT, '', [], [], $token['value']);
+            return new Node(NodeType::TEXT, '', [], [], $token->value);
         }
-        if ($token['type'] === TokenType::RAW) {
+        if ($token->type === TokenType::RAW) {
             $this->advance();
 
-            return new Node(NodeType::RAW, '', [], [], $token['value']);
+            return new Node(NodeType::RAW, '', [], [], $token->value);
         }
-        if ($token['type'] === TokenType::TAG_OPEN) {
+        if ($token->type === TokenType::TAG_OPEN) {
             return $this->parseElement();
         }
-        if ($token['type'] === TokenType::TAG_CLOSE) {
+        if ($token->type === TokenType::TAG_CLOSE) {
             $this->consumeClosingTag();
 
             return null;
@@ -73,7 +74,7 @@ class Parser
     {
         // Consume the open tag token (e.g. from '<script').
         $openToken = $this->peek();
-        $tagName = $openToken['value'];
+        $tagName = $openToken->value;
         $this->advance(); // Consumes TAG_OPEN.
 
         // Parse any attributes.
@@ -82,25 +83,25 @@ class Parser
         $nextToken = $this->peek();
 
         // Handle self-closing tags.
-        if ($nextToken && $nextToken['type'] === TokenType::TAG_SELF_CLOSE) {
+        if ($nextToken && $nextToken->type === TokenType::TAG_SELF_CLOSE) {
             $this->advance();
             return new Node(NodeType::ELEMENT, $tagName, $attributes, []);
         }
         // Otherwise, expect a TAG_END for the opening tag.
-        else if ($nextToken && $nextToken['type'] === TokenType::TAG_END) {
+        else if ($nextToken && $nextToken->type === TokenType::TAG_END) {
             $this->advance(); // Consume the TAG_END for the opening tag.
 
             // Check if this is a raw element (like script or style).
             if (in_array(strtolower($tagName), ['script', 'style'])) {
                 $children = [];
                 // If a RAW token is present immediately, use it as the element’s content.
-                if ($this->peek() && $this->peek()['type'] === TokenType::RAW) {
+                if ($this->peek() && $this->peek()->type === TokenType::RAW) {
                     $rawToken = $this->peek();
                     $this->advance();
-                    $children[] = new Node(NodeType::RAW, '', [], [], $rawToken['value']);
+                    $children[] = new Node(NodeType::RAW, '', [], [], $rawToken->value);
                 }
                 // Consume the closing tag tokens (TAG_CLOSE and TAG_END).
-                if ($this->peek() && $this->peek()['type'] === TokenType::TAG_CLOSE) {
+                if ($this->peek() && $this->peek()->type === TokenType::TAG_CLOSE) {
                     $this->consumeClosingTag();
                 }
                 return new Node(NodeType::ELEMENT, $tagName, $attributes, $children);
@@ -123,18 +124,18 @@ class Parser
             if (! $token) {
                 break;
             }
-            if (in_array($token['type'], [
+            if (in_array($token->type, [
                 TokenType::TAG_END,
                 TokenType::TAG_SELF_CLOSE,
             ])) {
                 break;
             }
-            if ($token['type'] === TokenType::ATTR_NAME) {
-                $attrName = $token['value'];
+            if ($token->type === TokenType::ATTR_NAME) {
+                $attrName = $token->value;
                 $this->advance();
                 $attrValue = null;
-                if ($this->peek() && $this->peek()['type'] === TokenType::ATTR_VALUE) {
-                    $attrValue = $this->peek()['value'];
+                if ($this->peek() && $this->peek()->type === TokenType::ATTR_VALUE) {
+                    $attrValue = $this->peek()->value;
                     $this->advance();
                 }
                 $attributes[$attrName] = $attrValue;
@@ -154,7 +155,7 @@ class Parser
             if (! $token) {
                 break;
             }
-            if ($token['type'] === TokenType::TAG_CLOSE) {
+            if ($token->type === TokenType::TAG_CLOSE) {
                 $this->consumeClosingTag();
                 break;
             }
@@ -172,7 +173,7 @@ class Parser
         $this->advance(); // Consume TAG_CLOSE.
     }
 
-    protected function peek(): ?array
+    protected function peek(): ?Token
     {
         return ($this->position < $this->length) ? $this->tokens[$this->position] : null;
     }
